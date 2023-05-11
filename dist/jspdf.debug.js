@@ -5,8 +5,8 @@
 
   /** @license
    * jsPDF - PDF Document creation from JavaScript
-   * Version 1.5.3 Built on 2018-12-27T14:11:42.696Z
-   *                      CommitID d93d28db14
+   * Version 1.5.4 Built on 2023-05-11T23:44:23.608Z
+   *                      CommitID 51c42487ee
    *
    * Copyright (c) 2010-2016 James Hall <james@parall.ax>, https://github.com/MrRio/jsPDF
    *               2010 Aaron Spike, https://github.com/acspike
@@ -3833,7 +3833,7 @@
      * @memberOf jsPDF
      */
 
-    jsPDF.version = '1.5.3';
+    jsPDF.version = '1.5.4';
 
     if (typeof define === 'function' && define.amd) {
       define('jsPDF', function () {
@@ -17522,10 +17522,10 @@
 
   /* FileSaver.js
    * A saveAs() FileSaver implementation.
-   * 1.3.8
-   * 2018-03-22 14:03:47
+   * 1.3.2
+   * 2016-06-16 18:25:19
    *
-   * By Eli Grey, https://eligrey.com
+   * By Eli Grey, http://eligrey.com
    * License: MIT
    *   See https://github.com/eligrey/FileSaver.js/blob/master/LICENSE.md
    */
@@ -17534,7 +17534,7 @@
 
   /*jslint bitwise: true, indent: 4, laxbreak: true, laxcomma: true, smarttabs: true, plusplus: true */
 
-  /*! @source http://purl.eligrey.com/github/FileSaver.js/blob/master/src/FileSaver.js */
+  /*! @source http://purl.eligrey.com/github/FileSaver.js/blob/master/FileSaver.js */
   var saveAs = saveAs || function (view) {
 
     if (typeof view === "undefined" || typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
@@ -17554,9 +17554,8 @@
     },
         is_safari = /constructor/i.test(view.HTMLElement) || view.safari,
         is_chrome_ios = /CriOS\/[\d]+/.test(navigator.userAgent),
-        setImmediate = view.setImmediate || view.setTimeout,
         throw_outside = function (ex) {
-      setImmediate(function () {
+      (view.setImmediate || view.setTimeout)(function () {
         throw ex;
       }, 0);
     },
@@ -17663,14 +17662,14 @@
 
       if (can_use_save_link) {
         object_url = get_URL().createObjectURL(blob);
-        setImmediate(function () {
+        setTimeout(function () {
           save_link.href = object_url;
           save_link.download = name;
           click(save_link);
           dispatch_all();
           revoke(object_url);
           filesaver.readyState = filesaver.DONE;
-        }, 0);
+        });
         return;
       }
 
@@ -17692,9 +17691,7 @@
 
         return navigator.msSaveOrOpenBlob(blob, name);
       };
-    } // todo: detect chrome extensions & packaged apps
-    //save_link.target = "_blank";
-
+    }
 
     FS_proto.abort = function () {};
 
@@ -17703,7 +17700,18 @@
     FS_proto.DONE = 2;
     FS_proto.error = FS_proto.onwritestart = FS_proto.onprogress = FS_proto.onwrite = FS_proto.onabort = FS_proto.onerror = FS_proto.onwriteend = null;
     return saveAs;
-  }(typeof self !== "undefined" && self || typeof window !== "undefined" && window || undefined);
+  }(typeof self !== "undefined" && self || typeof window !== "undefined" && window || undefined.content); // `self` is undefined in Firefox for Android content script context
+  // while `this` is nsIContentFrameMessageManager
+  // with an attribute `content` that corresponds to the window
+
+
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports.saveAs = saveAs;
+  } else if (typeof define !== "undefined" && define !== null && define.amd !== null) {
+    define("FileSaver.js", function () {
+      return saveAs;
+    });
+  }
 
   // (c) Dean McNamee <dean@gmail.com>, 2013.
   //
